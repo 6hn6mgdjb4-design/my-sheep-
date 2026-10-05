@@ -1,0 +1,1331 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no,maximum-scale=1">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#c8e4f0">
+<title>Мои овечки</title>
+<style>
+:root {
+  --cream: #fbf7ef;
+  --card: #fffdf8;
+  --line: #e6dcc8;
+  --text: #3d4635;
+  --muted: #7a8470;
+  --green: #8faf7a;
+  --gold: #e2b85a;
+  --pink: #f0d4ce;
+  --blue: #a8c8d8;
+  --shadow: 0 8px 28px rgba(60,70,50,.14);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body {
+  height: 100%;
+  background: #dfe6d6;
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  color: var(--text);
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+body { min-height: 100%; min-height: -webkit-fill-available; min-height: 100dvh; }
+button, .btn, .plot, .match-cell, .breed-slot, .sell-btn, .buy, .close-btn, .sheep, .play-btn {
+  cursor: pointer;
+  -webkit-user-select: none;
+  user-select: none;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ========== COVER / SPLASH ========== */
+.cover {
+  position: fixed; inset: 0; z-index: 500;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  background: linear-gradient(180deg, #b8dcf0 0%, #d4e8c0 45%, #a8c878 100%);
+  overflow: hidden;
+  transition: opacity .55s ease, visibility .55s;
+}
+.cover.hide {
+  opacity: 0; visibility: hidden; pointer-events: none;
+}
+.cover-sky {
+  position: absolute; inset: 0 0 40% 0;
+  background: linear-gradient(180deg, #9ec8e8 0%, #c8e4f0 60%, #dce8c8 100%);
+}
+.cover-sun {
+  position: absolute; top: 12%; right: 14%;
+  width: 70px; height: 70px; border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #fff8d0, #ffd060);
+  box-shadow: 0 0 50px rgba(255,220,80,.8);
+  animation: sun-pulse 3s ease-in-out infinite;
+}
+.cover-cloud {
+  position: absolute; background: rgba(255,255,255,.75);
+  border-radius: 50px; filter: blur(1px);
+  animation: cloud-drift 16s ease-in-out infinite alternate;
+}
+.cover-cloud.c1 { width: 90px; height: 32px; top: 18%; left: 8%; }
+.cover-cloud.c2 { width: 60px; height: 22px; top: 28%; left: 55%; animation-duration: 12s; animation-delay: 1s; }
+.cover-cloud.c3 { width: 70px; height: 26px; top: 14%; left: 35%; animation-duration: 20s; animation-delay: 2s; }
+
+.cover-hills {
+  position: absolute; bottom: 0; left: 0; right: 0; height: 48%;
+  background: linear-gradient(180deg, #9fc870 0%, #7fa850 100%);
+}
+.cover-hills::before {
+  content: ""; position: absolute; top: -40px; left: -10%; right: -10%; height: 80px;
+  background: radial-gradient(ellipse 80% 100% at 50% 100%, #9fc870, transparent);
+}
+.cover-mt {
+  position: absolute; bottom: 42%; width: 0; height: 0;
+  border-style: solid; border-color: transparent transparent #7a9a78 transparent;
+  opacity: .9;
+}
+.cover-mt.m1 { left: 5%; border-width: 0 70px 90px 70px; }
+.cover-mt.m2 { left: 35%; border-width: 0 100px 120px 100px; border-bottom-color: #6b8a6a; }
+.cover-mt.m3 { right: 5%; border-width: 0 80px 100px 80px; border-bottom-color: #7d9a75; }
+
+.cover-tree {
+  position: absolute; bottom: 28%; width: 40px;
+}
+.cover-tree .tr {
+  position: absolute; left: 50%; bottom: 0; width: 8px; height: 28px;
+  background: #6b4a30; transform: translateX(-50%); border-radius: 2px;
+}
+.cover-tree .cv {
+  position: absolute; left: 50%; bottom: 20px; width: 42px; height: 42px;
+  background: radial-gradient(circle at 40% 40%, #5a8a48, #3a6a35);
+  border-radius: 50%; transform: translateX(-50%);
+  box-shadow: -10px 8px 0 -6px #4a7a40, 8px 10px 0 -8px #3d6a38;
+}
+.cover-tree.t1 { left: 8%; transform: scale(.85); }
+.cover-tree.t2 { right: 10%; }
+
+.cover-sheep-wrap {
+  position: absolute; bottom: 22%; left: 50%; transform: translateX(-50%);
+  display: flex; gap: 18px; align-items: flex-end;
+}
+.cover-sheep {
+  width: 64px; height: 58px; position: relative;
+  animation: sheep-bob 2.2s ease-in-out infinite;
+  filter: drop-shadow(0 4px 4px rgba(40,50,30,.3));
+}
+.cover-sheep:nth-child(2) { animation-delay: .35s; transform: scale(.88); }
+.cover-sheep:nth-child(3) { animation-delay: .7s; transform: scale(.75); }
+.cover-sheep .body {
+  position: absolute; left: 6px; top: 10px; width: 42px; height: 32px;
+  background: radial-gradient(ellipse at 40% 40%, #fffef8, #f0ebe0);
+  border-radius: 48% 50% 42% 45%;
+}
+.cover-sheep .head {
+  position: absolute; right: 0; top: 14px; width: 20px; height: 24px;
+  background: linear-gradient(145deg, #5a564f, #3e3c38);
+  border-radius: 45% 48% 42% 42%; transform: rotate(-6deg);
+}
+.cover-sheep .leg {
+  position: absolute; bottom: 0; width: 5px; height: 14px;
+  background: #4a4640; border-radius: 2px;
+}
+.cover-sheep .leg.l { left: 16px; }
+.cover-sheep .leg.r { left: 30px; }
+
+.cover-content {
+  position: relative; z-index: 2;
+  text-align: center; padding: 20px;
+  margin-top: auto; margin-bottom: 8%;
+}
+.cover-logo {
+  font-size: 42px;
+  animation: logo-bounce 2s ease-in-out infinite;
+  filter: drop-shadow(0 4px 8px rgba(0,0,0,.15));
+}
+.cover-title {
+  font-size: 32px; font-weight: 900; letter-spacing: -.5px;
+  color: #2e3a28; margin: 8px 0 4px;
+  text-shadow: 0 2px 0 rgba(255,255,255,.4);
+  animation: title-in .8s ease-out both;
+}
+.cover-sub {
+  font-size: 14px; color: #4a5840; font-weight: 600; opacity: .85;
+  margin-bottom: 22px;
+  animation: title-in .8s ease-out .15s both;
+}
+.play-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  border: 0; border-radius: 20px;
+  padding: 16px 40px; min-height: 56px;
+  font-size: 18px; font-weight: 800;
+  background: linear-gradient(135deg, #8faf7a, #6e8f5c);
+  color: #fff;
+  box-shadow: 0 6px 0 #4a6a3a, 0 10px 24px rgba(60,90,40,.3);
+  transition: transform .12s, box-shadow .12s;
+  animation: title-in .8s ease-out .3s both, play-pulse 2s ease-in-out 1.2s infinite;
+}
+.play-btn:active {
+  transform: translateY(4px);
+  box-shadow: 0 2px 0 #4a6a3a, 0 4px 12px rgba(60,90,40,.25);
+}
+.cover-footer {
+  position: absolute; bottom: 16px; left: 0; right: 0;
+  text-align: center; font-size: 11px; color: rgba(40,50,30,.5); font-weight: 600;
+  z-index: 2;
+}
+
+@keyframes logo-bounce {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-8px) scale(1.05); }
+}
+@keyframes title-in {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes play-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.04); }
+}
+@keyframes sun-pulse {
+  0%, 100% { box-shadow: 0 0 40px rgba(255,220,80,.7); }
+  50% { box-shadow: 0 0 60px rgba(255,220,100,.95); }
+}
+@keyframes cloud-drift {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(24px); }
+}
+@keyframes sheep-bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+@keyframes flower-pop {
+  0% { transform: scale(.2) translateY(0) rotate(0); opacity: 0; }
+  20% { opacity: 1; }
+  100% { transform: scale(1.3) translateY(-50px) rotate(30deg); opacity: 0; }
+}
+@keyframes rain-fall {
+  0% { transform: translateY(-20px); opacity: 0; }
+  10% { opacity: 1; }
+  100% { transform: translateY(280px); opacity: .3; }
+}
+@keyframes pulse-ready {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(120,180,80,.4); }
+  50% { box-shadow: 0 0 0 4px rgba(120,180,80,.15); }
+}
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ========== APP ========== */
+.app {
+  max-width: 420px; margin: 0 auto;
+  min-height: 100%; min-height: -webkit-fill-available; min-height: 100dvh;
+  background: var(--cream);
+  display: flex; flex-direction: column;
+  position: relative; overflow: hidden;
+  box-shadow: 0 0 40px rgba(0,0,0,.08);
+  opacity: 0; pointer-events: none;
+  transition: opacity .4s ease;
+}
+.app.show { opacity: 1; pointer-events: auto; }
+
+header {
+  padding: 12px 14px 8px;
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  background: linear-gradient(180deg, #fffef9, var(--cream));
+  border-bottom: 1px solid var(--line);
+  z-index: 5; flex-shrink: 0;
+}
+header h1 { font-size: 17px; font-weight: 800; letter-spacing: -.3px; }
+.header-right { display: flex; gap: 6px; align-items: center; }
+.pill {
+  background: #fff; border: 1px solid var(--line); border-radius: 14px;
+  padding: 5px 10px; font-size: 12px; font-weight: 700;
+  display: flex; align-items: center; gap: 4px;
+  box-shadow: 0 2px 6px rgba(0,0,0,.04);
+}
+.pill.level { background: linear-gradient(135deg, #e8f0d8, #d4e4c0); }
+
+.scene-wrap {
+  position: relative; margin: 8px 10px 0; border-radius: 20px;
+  overflow: hidden; height: 230px; flex-shrink: 0;
+  box-shadow: var(--shadow); border: 1px solid #d5d0c0;
+}
+.scene { position: absolute; inset: 0; }
+.sky {
+  position: absolute; inset: 0 0 42% 0;
+  background: linear-gradient(180deg, #c8e4f0 0%, #dcefd0 100%);
+  transition: background 1.2s ease;
+}
+.sky.evening { background: linear-gradient(180deg, #f5c9a0 0%, #e8d4a8 60%, #c8d898 100%); }
+.sky.night { background: linear-gradient(180deg, #1e2a42 0%, #2a3a55 50%, #3a4a40 100%); }
+.sun, .moon {
+  position: absolute; border-radius: 50%; transition: all 1.2s ease; pointer-events: none;
+}
+.sun {
+  width: 44px; height: 44px;
+  background: radial-gradient(circle at 35% 35%, #fff8d0, #ffd060);
+  box-shadow: 0 0 28px rgba(255,220,100,.7);
+  top: 18px; right: 28px;
+  animation: sun-pulse 3s ease-in-out infinite;
+}
+.moon {
+  width: 36px; height: 36px;
+  background: radial-gradient(circle at 40% 40%, #f0f4ff, #c8d0e8);
+  box-shadow: 0 0 20px rgba(180,200,255,.4);
+  top: 22px; right: 32px; opacity: 0; transform: scale(.6);
+}
+.sky.night .sun { opacity: 0; transform: scale(.5); }
+.sky.night .moon { opacity: 1; transform: scale(1); }
+.sky.evening .sun { background: radial-gradient(circle at 35% 35%, #ffe0a0, #ff9a40); top: 50px; }
+
+.drift-cloud {
+  position: absolute; background: rgba(255,255,255,.55);
+  border-radius: 40px; filter: blur(2px); pointer-events: none;
+  animation: cloud-drift 12s ease-in-out infinite alternate;
+}
+.sky.night .drift-cloud { background: rgba(80,90,110,.4); }
+
+.mountains { position: absolute; bottom: 42%; left: 0; right: 0; height: 90px; pointer-events: none; }
+.mt {
+  position: absolute; bottom: 0; width: 0; height: 0;
+  border-style: solid; border-color: transparent transparent #8fa890 transparent;
+}
+.mt1 { left: -30px; border-width: 0 90px 80px 90px; border-bottom-color: #7a9a78; opacity: .9; }
+.mt2 { left: 60px; border-width: 0 110px 100px 110px; border-bottom-color: #6b8a6a; }
+.mt3 { right: -20px; border-width: 0 100px 85px 100px; border-bottom-color: #7d9a75; opacity: .85; }
+.mt4 { left: 140px; border-width: 0 70px 60px 70px; border-bottom-color: #8aa888; opacity: .7; }
+
+.forest { position: absolute; bottom: 40%; left: 0; right: 0; height: 70px; pointer-events: none; }
+.ftree { position: absolute; bottom: 0; width: 28px; }
+.ftree::before {
+  content: ""; position: absolute; left: 50%; bottom: 0; width: 5px; height: 18px;
+  background: #5a4030; transform: translateX(-50%); border-radius: 2px;
+}
+.ftree::after {
+  content: ""; position: absolute; left: 50%; bottom: 12px; width: 26px; height: 32px;
+  background: radial-gradient(ellipse at 50% 60%, #4a6b45, #3a5a38);
+  border-radius: 50% 50% 40% 40%; transform: translateX(-50%);
+  box-shadow: -8px 6px 0 -4px #456640, 7px 8px 0 -5px #3d5c38;
+}
+.ft1 { left: 8%; transform: scale(.7); opacity: .8; }
+.ft2 { left: 22%; transform: scale(.9); }
+.ft3 { left: 38%; transform: scale(.65); opacity: .75; }
+.ft4 { right: 28%; transform: scale(.85); }
+.ft5 { right: 12%; transform: scale(.7); opacity: .85; }
+.ft6 { right: 4%; transform: scale(.55); opacity: .7; }
+
+.ground {
+  position: absolute; inset: auto 0 0; height: 42%;
+  background: linear-gradient(180deg, #a8c878 0%, #8fb060 40%, #7a9a50 100%);
+  pointer-events: none;
+}
+.tree {
+  position: absolute; bottom: 28%; width: 56px; height: 90px; z-index: 2; pointer-events: none;
+}
+.tree .trunk {
+  position: absolute; left: 50%; bottom: 0; width: 10px; height: 36px;
+  background: linear-gradient(90deg, #6b4a30, #8a6340 40%, #5a3a28);
+  border-radius: 3px; transform: translateX(-50%);
+}
+.tree .canopy {
+  position: absolute; left: 50%; bottom: 28px; width: 54px; height: 54px;
+  background: radial-gradient(circle at 40% 40%, #6a9a55, #4a7a40 60%, #3a6a35);
+  border-radius: 50%; transform: translateX(-50%);
+  box-shadow: -14px 10px 0 -8px #5a8a48, 12px 14px 0 -10px #4a7a40, 0 -8px 0 -6px #6a9a55;
+}
+.tree.t1 { left: 4%; }
+.tree.t2 { right: 3%; transform: scale(.85); }
+
+.fence {
+  position: absolute; left: 10%; right: 10%; bottom: 12%; height: 58px; z-index: 3; pointer-events: none;
+}
+.fence-rail {
+  position: absolute; left: 0; right: 0; height: 5px;
+  background: linear-gradient(180deg, #b89060, #8a6540);
+  border-radius: 2px; box-shadow: 0 1px 2px rgba(0,0,0,.15);
+}
+.fence-rail.r1 { top: 8px; }
+.fence-rail.r2 { top: 28px; }
+.fence-post {
+  position: absolute; bottom: 0; width: 8px; height: 52px;
+  background: linear-gradient(90deg, #7a5535, #a07848 45%, #6a4a30);
+  border-radius: 2px 2px 0 0;
+}
+.fence-post:nth-child(3) { left: 0; }
+.fence-post:nth-child(4) { left: 25%; }
+.fence-post:nth-child(5) { left: 50%; transform: translateX(-50%); }
+.fence-post:nth-child(6) { right: 25%; }
+.fence-post:nth-child(7) { right: 0; }
+
+.weather-layer { position: absolute; inset: 0; pointer-events: none; z-index: 6; overflow: hidden; }
+.rain-drop {
+  position: absolute; width: 2px; height: 12px;
+  background: linear-gradient(transparent, rgba(180,200,220,.6));
+  border-radius: 1px; animation: rain-fall linear infinite;
+}
+.flower {
+  position: absolute; font-size: 20px; pointer-events: none;
+  animation: flower-pop .85s ease-out forwards; z-index: 8;
+}
+
+.sheep {
+  position: absolute; bottom: 18%; width: 72px; height: 68px;
+  border: 0; background: none; padding: 0; z-index: 4;
+  filter: drop-shadow(0 4px 3px rgba(40,50,30,.25));
+  transition: transform .12s;
+  animation: sheep-idle 2.4s ease-in-out infinite;
+}
+@keyframes sheep-idle {
+  0%, 100% { bottom: 18%; }
+  50% { bottom: 20%; }
+}
+@keyframes sheep-idle-baby {
+  0%, 100% { bottom: 16%; }
+  50% { bottom: 18%; }
+}
+.sheep:nth-child(2) { animation-delay: .4s; }
+.sheep:nth-child(3) { animation-delay: .8s; }
+.sheep:active { transform: scale(.93); animation: none; }
+.sheep.baby { width: 48px; height: 46px; bottom: 16%; animation-name: sheep-idle-baby; animation-duration: 1.8s; }
+.sheep .body {
+  position: absolute; left: 8px; top: 12px; width: 48px; height: 36px;
+  background: radial-gradient(ellipse at 40% 40%, #fffef8, #f0ebe0 70%);
+  border-radius: 48% 50% 42% 45%;
+  box-shadow: inset -4px -5px 8px rgba(180,170,150,.35);
+  pointer-events: none;
+}
+.sheep.baby .body { left: 5px; top: 10px; width: 32px; height: 24px; }
+.sheep .head {
+  position: absolute; right: 2px; top: 16px; width: 24px; height: 28px;
+  background: linear-gradient(145deg, #5a564f, #3e3c38);
+  border-radius: 45% 48% 42% 42%; transform: rotate(-6deg); pointer-events: none;
+}
+.sheep.baby .head { right: 1px; top: 12px; width: 16px; height: 18px; }
+.sheep .ear {
+  position: absolute; width: 12px; height: 7px; background: #4a4842;
+  border-radius: 80% 20%; top: 4px;
+}
+.sheep .ear.l { left: -8px; transform: rotate(-20deg); }
+.sheep .ear.r { right: -8px; transform: rotate(20deg); }
+.sheep.baby .ear { width: 8px; height: 5px; }
+.sheep.baby .ear.l { left: -5px; }
+.sheep.baby .ear.r { right: -5px; }
+.sheep .eye {
+  position: absolute; width: 4px; height: 4px; background: #fff;
+  border-radius: 50%; top: 9px; right: 5px;
+  box-shadow: inset 1.5px 1.5px 0 0 #222;
+}
+.sheep.baby .eye { width: 3px; height: 3px; top: 6px; right: 3px; }
+.sheep .leg {
+  position: absolute; bottom: 0; width: 6px; height: 18px;
+  background: linear-gradient(180deg, #4a4640, #2e2c28); border-radius: 3px;
+  pointer-events: none;
+}
+.sheep .leg.l { left: 18px; }
+.sheep .leg.r { left: 36px; }
+.sheep.baby .leg { width: 4px; height: 12px; }
+.sheep.baby .leg.l { left: 12px; }
+.sheep.baby .leg.r { left: 24px; }
+.sheep .tail {
+  position: absolute; left: 4px; top: 28px; width: 12px; height: 11px;
+  background: #fffef8; border-radius: 50%;
+  box-shadow: inset -2px -2px 3px rgba(180,170,150,.3); pointer-events: none;
+}
+.sheep.baby .tail { left: 2px; top: 20px; width: 8px; height: 7px; }
+.sheep .name-tag {
+  position: absolute; bottom: -16px; left: 50%; transform: translateX(-50%);
+  font-size: 9px; font-weight: 700; color: var(--text);
+  background: rgba(255,255,255,.85); padding: 1px 6px; border-radius: 8px;
+  white-space: nowrap; pointer-events: none; opacity: .9;
+}
+.sheep.rare .body { background: radial-gradient(ellipse at 40% 40%, #f0f8ff, #d8e8f8 70%); }
+.sheep.epic .body { background: radial-gradient(ellipse at 40% 40%, #f8f0ff, #e8d8f8 70%); }
+.sheep.mythic .body {
+  background: radial-gradient(ellipse at 40% 40%, #fff8e8, #f8e8c0 70%);
+  box-shadow: inset -4px -5px 8px rgba(180,150,80,.3), 0 0 12px rgba(240,200,80,.4);
+}
+
+.time-weather {
+  position: absolute; top: 8px; left: 10px;
+  background: rgba(255,255,255,.8); border-radius: 12px; padding: 4px 10px;
+  font-size: 11px; font-weight: 700; z-index: 7;
+  pointer-events: none;
+}
+
+.panel {
+  flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch;
+  padding: 10px 12px 28px; position: relative; z-index: 10;
+  animation: fade-up .5s ease both;
+}
+.stats {
+  display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin-bottom: 8px;
+}
+.stat {
+  background: var(--card); border: 1px solid var(--line); border-radius: 12px;
+  padding: 8px 4px; text-align: center; font-size: 10px; color: var(--muted);
+}
+.stat b { display: block; font-size: 15px; color: var(--text); margin-top: 2px; }
+.actions {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 10px 0 12px;
+}
+.btn {
+  border: 0; border-radius: 14px; padding: 14px 8px; min-height: 48px;
+  font-weight: 700; font-size: 13px;
+  background: #e8efd8; color: #3e573a; transition: transform .1s;
+}
+.btn:active { transform: scale(.96); }
+.btn.primary { background: var(--green); color: #fff; }
+.btn.gold { background: linear-gradient(135deg, #f0d080, #e2b85a); color: #5a4010; }
+.btn.blue { background: linear-gradient(135deg, #c0dce8, #a0c0d0); color: #2a4050; }
+.btn:disabled { opacity: .45; pointer-events: none; }
+
+.section {
+  background: var(--card); border: 1px solid var(--line); border-radius: 16px;
+  padding: 12px; margin-bottom: 10px;
+}
+.section h2 {
+  font-size: 14px; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;
+}
+.sheep-list {
+  display: flex; flex-direction: column; gap: 6px;
+  max-height: 200px; overflow-y: auto; -webkit-overflow-scrolling: touch;
+}
+.sheep-card {
+  display: flex; align-items: center; gap: 10px;
+  background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 8px 10px;
+}
+.sheep-card .icon {
+  width: 36px; height: 36px; border-radius: 10px; background: #f5f0e6;
+  display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0;
+}
+.sheep-card .info { flex: 1; min-width: 0; }
+.sheep-card .info b { font-size: 13px; display: block; }
+.sheep-card .info .meta { font-size: 10px; color: var(--muted); }
+.sheep-card .sell-btn {
+  border: 0; background: var(--pink); color: #8b4a40;
+  font-size: 11px; font-weight: 700; padding: 10px 12px;
+  border-radius: 10px; min-height: 40px; white-space: nowrap;
+}
+
+.garden-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.plot {
+  aspect-ratio: 1; background: #c8b890; border-radius: 12px; border: 2px solid #a89060;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  font-size: 26px; position: relative; overflow: hidden; min-height: 72px;
+}
+.plot.empty { background: #d4c8a0; }
+.plot.growing { background: linear-gradient(180deg, #b8d890, #98b870); }
+.plot.ready {
+  background: linear-gradient(180deg, #a0d070, #80b050);
+  animation: pulse-ready 1.5s ease infinite;
+}
+.plot .timer {
+  position: absolute; bottom: 4px; font-size: 10px; font-weight: 700;
+  color: #3a5030; background: rgba(255,255,255,.75); padding: 1px 5px; border-radius: 4px;
+}
+
+.overlay {
+  position: fixed; inset: 0; background: rgba(30,35,25,.55); z-index: 100;
+  display: flex; align-items: flex-end; justify-content: center;
+  opacity: 0; pointer-events: none; transition: opacity .25s;
+}
+.overlay.show { opacity: 1; pointer-events: auto; }
+.modal {
+  width: 100%; max-width: 420px; max-height: 85%;
+  background: var(--cream); border-radius: 24px 24px 0 0;
+  padding: 16px 14px 32px; overflow-y: auto; -webkit-overflow-scrolling: touch;
+  transform: translateY(40px); transition: transform .3s ease;
+}
+.overlay.show .modal { transform: translateY(0); }
+.modal-header {
+  display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;
+}
+.modal-header h2 { font-size: 17px; }
+.close-btn {
+  width: 40px; height: 40px; border: 0; border-radius: 50%;
+  background: #e8e0d0; font-size: 22px;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.shop-item {
+  display: flex; align-items: center; gap: 10px;
+  background: #fff; border: 1px solid var(--line); border-radius: 12px;
+  padding: 12px; margin-bottom: 6px;
+}
+.shop-item .buy {
+  margin-left: auto; border: 0; background: var(--gold); color: #5a4010;
+  font-weight: 700; font-size: 13px; padding: 10px 14px; border-radius: 10px; min-height: 40px;
+}
+.rarity {
+  font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 6px; display: inline-block;
+}
+.rarity.common { background: #e8e4d8; color: #5a5848; }
+.rarity.rare { background: #d0e8f8; color: #306080; }
+.rarity.epic { background: #e8d8f8; color: #604080; }
+.rarity.mythic { background: #f8e8c0; color: #806020; }
+
+.match-board {
+  display: grid; grid-template-columns: repeat(6, 1fr); gap: 4px; margin: 10px 0;
+}
+.match-cell {
+  aspect-ratio: 1; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px; background: #fff; border: 2px solid transparent;
+  transition: transform .1s, border-color .1s; min-height: 44px;
+}
+.match-cell.selected { border-color: var(--gold); transform: scale(1.08); }
+.match-score { text-align: center; font-size: 14px; font-weight: 700; margin-bottom: 6px; }
+
+.coll-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.coll-card {
+  background: #fff; border: 1px solid var(--line); border-radius: 12px;
+  padding: 10px 6px; text-align: center; font-size: 11px;
+}
+.coll-card .emoji { font-size: 28px; margin-bottom: 4px; }
+.coll-card.locked { opacity: .4; filter: grayscale(1); }
+.coll-card .name { font-weight: 700; font-size: 12px; }
+
+.toast {
+  position: fixed; left: 50%; bottom: 28px;
+  transform: translateX(-50%) translateY(30px);
+  background: #2e3628; color: #fff; padding: 12px 18px; border-radius: 16px;
+  font-size: 13px; font-weight: 700; opacity: 0; pointer-events: none;
+  transition: .25s; z-index: 200; max-width: 90%; text-align: center;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+.breed-row { display: flex; gap: 8px; margin-bottom: 10px; }
+.breed-slot {
+  flex: 1; min-height: 72px; border: 2px dashed var(--line); border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; color: var(--muted); background: #f8f4ec; text-align: center;
+}
+.breed-slot.filled { border-style: solid; border-color: var(--green); background: #f0f8e8; }
+.xp-bar {
+  height: 6px; background: #e0d8c8; border-radius: 3px; margin-top: 4px; overflow: hidden;
+}
+.xp-bar div {
+  height: 100%; background: linear-gradient(90deg, var(--green), #a0c870);
+  border-radius: 3px; transition: width .4s;
+}
+.hint { font-size: 11px; color: var(--muted); text-align: center; margin-top: 8px; }
+</style>
+</head>
+<body>
+
+<!-- ========== COVER ========== -->
+<div class="cover" id="cover">
+  <div class="cover-sky">
+    <div class="cover-sun"></div>
+    <div class="cover-cloud c1"></div>
+    <div class="cover-cloud c2"></div>
+    <div class="cover-cloud c3"></div>
+  </div>
+  <div class="cover-mt m1"></div>
+  <div class="cover-mt m2"></div>
+  <div class="cover-mt m3"></div>
+  <div class="cover-hills"></div>
+  <div class="cover-tree t1"><div class="tr"></div><div class="cv"></div></div>
+  <div class="cover-tree t2"><div class="tr"></div><div class="cv"></div></div>
+  <div class="cover-sheep-wrap">
+    <div class="cover-sheep"><div class="body"></div><div class="head"></div><div class="leg l"></div><div class="leg r"></div></div>
+    <div class="cover-sheep"><div class="body"></div><div class="head"></div><div class="leg l"></div><div class="leg r"></div></div>
+    <div class="cover-sheep"><div class="body"></div><div class="head"></div><div class="leg l"></div><div class="leg r"></div></div>
+  </div>
+  <div class="cover-content">
+    <div class="cover-logo">🐑</div>
+    <div class="cover-title">Мои овечки</div>
+    <div class="cover-sub">ферма · породы · мини-игра</div>
+    <button type="button" class="play-btn" id="playBtn">▶ Играть</button>
+  </div>
+  <div class="cover-footer">мини-проект · открой и поделись с друзьями</div>
+</div>
+
+<!-- ========== GAME ========== -->
+<main class="app" id="app">
+  <header>
+    <h1>🐑 Мои овечки</h1>
+    <div class="header-right">
+      <div class="pill level">⭐ <span id="level">1</span></div>
+      <div class="pill">🪙 <span id="coins">40</span></div>
+    </div>
+  </header>
+
+  <div class="scene-wrap">
+    <div class="time-weather" id="timeWeather">☀️ 10:00 · Ясно</div>
+    <div class="scene" id="scene">
+      <div class="sky" id="sky">
+        <div class="sun"></div>
+        <div class="moon"></div>
+        <div class="drift-cloud" style="width:60px;height:22px;top:20px;left:10%;animation-duration:14s"></div>
+        <div class="drift-cloud" style="width:44px;height:16px;top:40px;left:45%;animation-duration:18s;animation-delay:2s"></div>
+        <div class="drift-cloud" style="width:36px;height:14px;top:28px;left:70%;animation-duration:11s;animation-delay:1s"></div>
+      </div>
+      <div class="mountains">
+        <div class="mt mt1"></div><div class="mt mt2"></div><div class="mt mt3"></div><div class="mt mt4"></div>
+      </div>
+      <div class="forest">
+        <div class="ftree ft1"></div><div class="ftree ft2"></div><div class="ftree ft3"></div>
+        <div class="ftree ft4"></div><div class="ftree ft5"></div><div class="ftree ft6"></div>
+      </div>
+      <div class="ground"></div>
+      <div class="tree t1"><div class="trunk"></div><div class="canopy"></div></div>
+      <div class="tree t2"><div class="trunk"></div><div class="canopy"></div></div>
+      <div class="fence">
+        <div class="fence-rail r1"></div><div class="fence-rail r2"></div>
+        <div class="fence-post"></div><div class="fence-post"></div><div class="fence-post"></div>
+        <div class="fence-post"></div><div class="fence-post"></div>
+      </div>
+      <div id="sheepContainer"></div>
+      <div id="flowers" style="position:absolute;inset:0;pointer-events:none;z-index:8;overflow:hidden"></div>
+      <div class="weather-layer" id="weatherLayer"></div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="stats">
+      <div class="stat">🌾 Корм<br><b id="feed">10</b></div>
+      <div class="stat">🧶 Шерсть<br><b id="wool">2</b></div>
+      <div class="stat">🌱 Семена<br><b id="seeds">4</b></div>
+      <div class="stat">💧 Вода<br><b id="water">6</b></div>
+      <div class="stat">⭐ XP<br><b id="xp">0</b>/<span id="xpNeed">20</span></div>
+    </div>
+    <div class="xp-bar"><div id="xpFill" style="width:0%"></div></div>
+    <div class="actions">
+      <button type="button" class="btn primary" id="feedBtn">🌾 Покормить</button>
+      <button type="button" class="btn blue" id="waterBtn">💧 Напоить</button>
+      <button type="button" class="btn gold" id="woolBtn">✂️ Стрижка</button>
+      <button type="button" class="btn" id="gardenBtn">🌱 Огород</button>
+      <button type="button" class="btn blue" id="gameBtn">🎮 Мини-игра</button>
+      <button type="button" class="btn" id="shopBtn">🛒 Магазин</button>
+      <button type="button" class="btn" id="collBtn">📖 Породы</button>
+      <button type="button" class="btn" id="breedBtn" style="grid-column:1/-1;display:none">🧬 Скрестить</button>
+    </div>
+    <div class="section">
+      <h2>🐑 Моё стадо <span style="font-size:11px;color:var(--muted);font-weight:500" id="herdCount">(2)</span></h2>
+      <div class="sheep-list" id="sheepList"></div>
+    </div>
+  </div>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<div class="overlay" id="gardenOverlay">
+  <div class="modal">
+    <div class="modal-header"><h2>🌱 Огород</h2><button type="button" class="close-btn" data-close="gardenOverlay">×</button></div>
+    <p class="hint" style="text-align:left;margin-bottom:10px">Посадите семена и соберите урожай.</p>
+    <div class="garden-grid" id="gardenGrid"></div>
+    <p class="hint">Семена: <b id="seedsModal">3</b></p>
+  </div>
+</div>
+<div class="overlay" id="shopOverlay">
+  <div class="modal">
+    <div class="modal-header"><h2>🛒 Магазин</h2><button type="button" class="close-btn" data-close="shopOverlay">×</button></div>
+    <div id="shopList"></div>
+  </div>
+</div>
+<div class="overlay" id="collOverlay">
+  <div class="modal">
+    <div class="modal-header"><h2>📖 Книга пород</h2><button type="button" class="close-btn" data-close="collOverlay">×</button></div>
+    <p class="hint" style="text-align:left;margin-bottom:10px">Открывайте новые виды.</p>
+    <div class="coll-grid" id="collGrid"></div>
+  </div>
+</div>
+<div class="overlay" id="matchOverlay">
+  <div class="modal">
+    <div class="modal-header"><h2>🎮 Мини-игра</h2><button type="button" class="close-btn" data-close="matchOverlay">×</button></div>
+    <div class="match-score">Очки: <span id="matchScore">0</span> · Ходы: <span id="matchMoves">12</span></div>
+    <div class="match-board" id="matchBoard"></div>
+    <p class="hint">Монеты = очки × 0.5</p>
+    <button type="button" class="btn primary" id="matchFinish" style="width:100%;margin-top:10px">Забрать награды</button>
+  </div>
+</div>
+<div class="overlay" id="breedOverlay">
+  <div class="modal">
+    <div class="modal-header"><h2>🧬 Скрещивание</h2><button type="button" class="close-btn" data-close="breedOverlay">×</button></div>
+    <p class="hint" style="text-align:left;margin-bottom:10px">Две взрослые · 30 🪙</p>
+    <div class="breed-row">
+      <div class="breed-slot" id="breed1">Выбрать</div>
+      <div style="align-self:center;font-size:20px">+</div>
+      <div class="breed-slot" id="breed2">Выбрать</div>
+    </div>
+    <button type="button" class="btn primary" id="doBreed" style="width:100%" disabled>Скрестить · 30 🪙</button>
+    <div id="breedSelectList" style="margin-top:12px"></div>
+  </div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  function onTap(el, fn) {
+    if (!el) return;
+    var locked = false;
+    function run(e) {
+      if (locked) return;
+      locked = true;
+      if (e && e.cancelable) try { e.preventDefault(); } catch (x) {}
+      try { fn(e); } catch (err) { console.error(err); }
+      setTimeout(function () { locked = false; }, 320);
+    }
+    el.addEventListener('click', run, false);
+    el.addEventListener('touchend', function (e) {
+      if (e.target !== el && !el.contains(e.target)) return;
+      run(e);
+    }, { passive: false });
+  }
+
+  function $(id) { return document.getElementById(id); }
+
+  /* Cover → Game */
+  onTap($('playBtn'), function () {
+    var cover = $('cover');
+    var app = $('app');
+    if (cover) cover.classList.add('hide');
+    if (app) app.classList.add('show');
+  });
+
+  var SPECIES = [
+    { id: 'merino', name: 'Меринос', emoji: '🐑', rarity: 'common', sell: 14 },
+    { id: 'romney', name: 'Ромни', emoji: '🐑', rarity: 'common', sell: 15 },
+    { id: 'suffolk', name: 'Суффолк', emoji: '🐑', rarity: 'common', sell: 16 },
+    { id: 'icelandic', name: 'Исландская', emoji: '🤍', rarity: 'rare', sell: 28 },
+    { id: 'shetland', name: 'Шетлендская', emoji: '🤎', rarity: 'rare', sell: 30 },
+    { id: 'lincoln', name: 'Линкольн', emoji: '☁️', rarity: 'rare', sell: 32 },
+    { id: 'karakul', name: 'Каракуль', emoji: '🌑', rarity: 'epic', sell: 55 },
+    { id: 'golden', name: 'Золотистая', emoji: '✨', rarity: 'epic', sell: 60 },
+    { id: 'rainbow', name: 'Радужная', emoji: '🌈', rarity: 'epic', sell: 75 },
+    { id: 'aurora', name: 'Аврора', emoji: '🌟', rarity: 'mythic', sell: 130 },
+    { id: 'crystal', name: 'Кристальная', emoji: '💎', rarity: 'mythic', sell: 140 }
+  ];
+  var RARITY_WEIGHT = { common: 50, rare: 28, epic: 15, mythic: 5 };
+  var NAMES = ['Белка','Снежка','Пушок','Ромашка','Ватрушка','Бусинка','Лунтик','Звёздочка','Плюша','Кудряшка','Шерстик','Барашек','Нюша','Тимка','Милка','Солнышко','Искорка','Облачко'];
+
+  var state = {
+    coins: 50, feed: 10, wool: 2, seeds: 4, water: 6, level: 1, xp: 0, hour: 10, weather: 'clear',
+    sheep: [
+      { id: 1, name: 'Белка', species: 'merino', age: 'adult', woolReady: true },
+      { id: 2, name: 'Снежка', species: 'icelandic', age: 'adult', woolReady: true }
+    ],
+    nextId: 3,
+    collection: { merino: true, icelandic: true },
+    garden: [null, null, null, null, null, null],
+    breedSlot: [null, null],
+    breedPicking: 0,
+    dog: null,
+    wolfActive: false
+  };
+
+  function xpNeed(lvl) { return 15 + lvl * 12; }
+  var GROW_MS = 25000;
+
+  function toast(msg) {
+    var t = $('toast');
+    if (!t) return;
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(t._timer);
+    t._timer = setTimeout(function () { t.classList.remove('show'); }, 1600);
+  }
+
+  function spawnFlowers(btn) {
+    var box = $('flowers'), scene = $('scene');
+    if (!box || !scene || !btn) return;
+    var br = btn.getBoundingClientRect(), sr = scene.getBoundingClientRect();
+    var hand = document.createElement('span');
+    hand.className = 'flower';
+    hand.textContent = '🤚';
+    hand.style.left = (br.left - sr.left + br.width * 0.35) + 'px';
+    hand.style.top = (br.top - sr.top + 5) + 'px';
+    hand.style.fontSize = '22px';
+    box.appendChild(hand);
+    setTimeout(function () { if (hand.parentNode) hand.parentNode.removeChild(hand); }, 700);
+    for (var i = 0; i < 5; i++) {
+      var f = document.createElement('span');
+      f.className = 'flower';
+      f.textContent = i % 2 ? '♡' : '✿';
+      f.style.left = (br.left - sr.left + br.width / 2 - 10 + (Math.random() * 50 - 25)) + 'px';
+      f.style.top = (br.top - sr.top + 20 + (Math.random() * 24 - 12)) + 'px';
+      f.style.animationDelay = (i * 0.05) + 's';
+      box.appendChild(f);
+      (function (el) { setTimeout(function () { if (el.parentNode) el.parentNode.removeChild(el); }, 900); })(f);
+    }
+  }
+
+  function sp(id) {
+    for (var i = 0; i < SPECIES.length; i++) if (SPECIES[i].id === id) return SPECIES[i];
+    return SPECIES[0];
+  }
+  function rarityLabel(r) {
+    return { common: 'Обычная', rare: 'Редкая', epic: 'Эпическая', mythic: 'Мифическая' }[r] || r;
+  }
+  function sellPrice(sh) {
+    var p = sp(sh.species).sell;
+    if (sh.age === 'baby') p = Math.floor(p * 0.4);
+    return p;
+  }
+  function addXp(n) {
+    state.xp += n;
+    var need = xpNeed(state.level);
+    while (state.xp >= need) {
+      state.xp -= need;
+      state.level++;
+      toast('⭐ Уровень фермы ' + state.level + '!');
+      need = xpNeed(state.level);
+      if (state.level >= 5) { var bb = $('breedBtn'); if (bb) bb.style.display = 'block'; }
+    }
+    render();
+  }
+  function randomSpecies(preferHigher) {
+    var pool = [];
+    for (var i = 0; i < SPECIES.length; i++) {
+      var s = SPECIES[i], w = RARITY_WEIGHT[s.rarity] || 10;
+      if (preferHigher && s.rarity !== 'common') w = Math.floor(w * 1.6);
+      for (var j = 0; j < w; j++) pool.push(s.id);
+    }
+    return pool[Math.floor(Math.random() * pool.length)];
+  }
+  function randomName() {
+    var used = {}, n, tries = 0;
+    for (var i = 0; i < state.sheep.length; i++) used[state.sheep[i].name] = true;
+    do { n = NAMES[Math.floor(Math.random() * NAMES.length)]; tries++; } while (used[n] && tries < 30);
+    return n;
+  }
+
+  function render() {
+    var el;
+    if ((el = $('coins'))) el.textContent = state.coins;
+    if ((el = $('feed'))) el.textContent = state.feed;
+    if ((el = $('wool'))) el.textContent = state.wool;
+    if ((el = $('seeds'))) el.textContent = state.seeds;
+    if ((el = $('water'))) el.textContent = state.water;
+    if ((el = $('level'))) el.textContent = state.level;
+    if ((el = $('xp'))) el.textContent = state.xp;
+    var need = xpNeed(state.level);
+    if ((el = $('xpNeed'))) el.textContent = need;
+    if ((el = $('xpFill'))) el.style.width = Math.min(100, (state.xp / need) * 100) + '%';
+    if ((el = $('herdCount'))) el.textContent = '(' + state.sheep.length + ')';
+    if (state.level >= 5 && (el = $('breedBtn'))) el.style.display = 'block';
+
+    var cont = $('sheepContainer');
+    if (cont) {
+      cont.innerHTML = '';
+      var positions = [
+        { left: '18%', scale: 1 }, { left: '48%', scale: 0.88 }, { left: '72%', scale: 0.78 },
+        { left: '32%', scale: 0.7, bottom: '12%' }, { left: '60%', scale: 0.65, bottom: '11%' }
+      ];
+      for (var i = 0; i < state.sheep.length; i++) {
+        (function (sh, idx) {
+          var s = sp(sh.species), pos = positions[idx % positions.length];
+          var btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'sheep' + (sh.age === 'baby' ? ' baby' : '') + (s.rarity !== 'common' ? ' ' + s.rarity : '');
+          btn.style.left = pos.left;
+          if (pos.scale) btn.style.transform = 'scale(' + pos.scale + ')';
+          if (pos.bottom) btn.style.bottom = pos.bottom;
+          btn.innerHTML =
+            '<span class="body"></span><span class="head"><i class="ear l"></i><i class="ear r"></i><i class="eye"></i></span>' +
+            '<span class="leg l"></span><span class="leg r"></span><span class="tail"></span>' +
+            '<span class="name-tag">' + sh.name + '</span>';
+          onTap(btn, function () {
+            if (sh.age === 'baby') { toast(sh.name + ' ещё малыш 🐣'); return; }
+            state.coins += 2; addXp(1); toast(sh.name + ' рада! +2 🪙');
+            spawnFlowers(btn); render();
+          });
+          cont.appendChild(btn);
+        })(state.sheep[i], i);
+      }
+    }
+
+    var list = $('sheepList');
+    if (list) {
+      list.innerHTML = '';
+      for (var j = 0; j < state.sheep.length; j++) {
+        (function (sh) {
+          var s = sp(sh.species), price = sellPrice(sh);
+          var card = document.createElement('div');
+          card.className = 'sheep-card';
+          card.innerHTML =
+            '<div class="icon">' + s.emoji + '</div><div class="info"><b>' + sh.name + '</b>' +
+            '<div class="meta"><span class="rarity ' + s.rarity + '">' + rarityLabel(s.rarity) + '</span> · ' +
+            (sh.age === 'baby' ? 'малыш' : 'взрослая') + ' · ' + s.name + '</div></div>' +
+            '<button type="button" class="sell-btn">Продать · ' + price + ' 🪙</button>';
+          onTap(card.querySelector('.sell-btn'), function () {
+            if (state.sheep.length <= 1) { toast('Нужна хотя бы одна овечка!'); return; }
+            state.coins += price;
+            var next = [];
+            for (var k = 0; k < state.sheep.length; k++) if (state.sheep[k].id !== sh.id) next.push(state.sheep[k]);
+            state.sheep = next;
+            toast(sh.name + ' продана · +' + price + ' 🪙'); addXp(2); render();
+          });
+          list.appendChild(card);
+        })(state.sheep[j]);
+      }
+    }
+    updateTimeUI();
+  }
+
+  function updateTimeUI() {
+    var h = state.hour, pad = function (n) { return (n < 10 ? '0' : '') + n; };
+    var period = 'day', icon = '☀️', wLabel = 'Ясно';
+    if (h >= 20 || h < 6) { period = 'night'; icon = '🌙'; }
+    else if (h >= 17) { period = 'evening'; icon = '🌅'; }
+    if (state.weather === 'cloudy') { icon = period === 'night' ? '☁️' : '⛅'; wLabel = 'Облачно'; }
+    if (state.weather === 'rain') { icon = '🌧️'; wLabel = 'Дождь'; }
+    var tw = $('timeWeather');
+    if (tw) tw.textContent = icon + ' ' + pad(h) + ':00 · ' + wLabel;
+    var sky = $('sky');
+    if (sky) sky.className = 'sky' + (period === 'night' ? ' night' : period === 'evening' ? ' evening' : '');
+    var layer = $('weatherLayer');
+    if (layer) {
+      layer.innerHTML = '';
+      if (state.weather === 'rain') {
+        for (var i = 0; i < 16; i++) {
+          var d = document.createElement('div');
+          d.className = 'rain-drop';
+          d.style.left = (Math.random() * 100) + '%';
+          d.style.animationDuration = (0.6 + Math.random() * 0.7) + 's';
+          d.style.animationDelay = (Math.random() * 1.5) + 's';
+          layer.appendChild(d);
+        }
+      }
+    }
+  }
+
+  onTap($('feedBtn'), function () {
+    if (state.feed < 2) { toast('Нужно больше корма 🌾'); return; }
+    var adults = 0;
+    for (var i = 0; i < state.sheep.length; i++) if (state.sheep[i].age === 'adult') adults++;
+    if (!adults) { toast('Нет взрослых овечек'); return; }
+    state.feed -= 2; state.coins += 3;
+    for (var j = 0; j < state.sheep.length; j++) {
+      var sh = state.sheep[j];
+      if (sh.age === 'baby' && Math.random() < 0.35) { sh.age = 'adult'; toast(sh.name + ' выросла! 🎉'); }
+      sh.woolReady = true;
+    }
+    if (Math.random() < 0.12 && state.sheep.length < 5) {
+      var sid = randomSpecies(false);
+      var baby = { id: state.nextId++, name: randomName(), species: sid, age: 'baby', woolReady: false };
+      state.sheep.push(baby); state.collection[sid] = true;
+      toast('Родился малыш: ' + baby.name + '! 🐣');
+    }
+    toast('Овечки поели ❤️ +3 🪙'); addXp(3); render();
+  });
+
+  onTap($('waterBtn'), function () {
+    if (state.water < 1) { toast('Нет воды — купите в магазине или дождитесь дождя'); return; }
+    state.water -= 1; state.coins += 2;
+    toast('💧 Овцы напились · +2 🪙'); addXp(2); render();
+  });
+
+  onTap($('woolBtn'), function () {
+    var gained = 0;
+    for (var i = 0; i < state.sheep.length; i++) {
+      var sh = state.sheep[i];
+      if (sh.age === 'adult' && sh.woolReady) {
+        var r = sp(sh.species).rarity;
+        gained += 1 + (r === 'mythic' ? 2 : r === 'epic' ? 1 : 0);
+        sh.woolReady = false;
+      }
+    }
+    if (!gained) { toast('Шерсть ещё не отросла. Покормите!'); return; }
+    state.wool += gained; state.coins += gained * 3;
+    toast('✂️ Шерсть: ' + gained + ' · +' + (gained * 3) + ' 🪙'); addXp(gained * 2); render();
+  });
+
+  function openGarden() {
+    var sm = $('seedsModal'); if (sm) sm.textContent = state.seeds;
+    var grid = $('gardenGrid'); if (!grid) return;
+    grid.innerHTML = '';
+    var now = Date.now();
+    for (var i = 0; i < state.garden.length; i++) {
+      (function (idx) {
+        var plot = state.garden[idx], el = document.createElement('div');
+        el.className = 'plot';
+        if (!plot) {
+          el.className += ' empty'; el.textContent = '⬜';
+          onTap(el, function () {
+            if (state.seeds < 1) { toast('Нужны семена!'); return; }
+            state.seeds--; state.garden[idx] = { plantedAt: Date.now(), growTime: GROW_MS };
+            toast('Посажено! 🌱'); openGarden(); render();
+          });
+        } else {
+          var left = plot.growTime - (now - plot.plantedAt);
+          if (left <= 0) {
+            el.className += ' ready'; el.textContent = '🌾';
+            onTap(el, function () {
+              state.feed += 4; state.garden[idx] = null;
+              toast('Урожай! +4 🌾'); addXp(2); openGarden(); render();
+            });
+          } else {
+            el.className += ' growing';
+            el.innerHTML = '🌿<span class="timer">' + Math.ceil(left / 1000) + 'с</span>';
+            onTap(el, function () { toast('Ещё растёт...'); });
+          }
+        }
+        grid.appendChild(el);
+      })(i);
+    }
+    var ov = $('gardenOverlay'); if (ov) ov.classList.add('show');
+  }
+  onTap($('gardenBtn'), openGarden);
+
+  var SHOP = [
+    { name: 'Семена овса ×3', emoji: '🌾', price: 8, action: function () { state.seeds += 3; return true; } },
+    { name: 'Семена клевера ×3', emoji: '🍀', price: 7, action: function () { state.seeds += 3; return true; } },
+    { name: 'Смесь семян ×8', emoji: '🌱', price: 18, action: function () { state.seeds += 8; return true; } },
+    { name: 'Овёс (корм ×5)', emoji: '🌾', price: 12, action: function () { state.feed += 5; return true; } },
+    { name: 'Сено (корм ×6)', emoji: '🪴', price: 14, action: function () { state.feed += 6; return true; } },
+    { name: 'Вода ×5', emoji: '💧', price: 8, action: function () { state.water += 5; return true; } },
+    { name: 'Вода ×12', emoji: '🪣', price: 16, action: function () { state.water += 12; return true; } },
+    { name: 'Ягнёнок', emoji: '🐣', price: 38, action: function () {
+      if (state.sheep.length >= 5) { toast('Загон полный'); return false; }
+      var sid = randomSpecies(false);
+      state.sheep.push({ id: state.nextId++, name: randomName(), species: sid, age: 'baby', woolReady: false });
+      state.collection[sid] = true; return true;
+    }},
+    { name: 'Собака-пастух', emoji: '🐕', price: 50, action: function () {
+      if (state.dog) { toast('Собака уже есть'); return false; }
+      state.dog = true; state.wolfActive = false;
+      toast('🐕 Пастух охраняет стадо!'); return true;
+    }}
+  ];
+  function openShop() {
+    var list = $('shopList'); if (!list) return;
+    list.innerHTML = '';
+    for (var i = 0; i < SHOP.length; i++) {
+      (function (item) {
+        var row = document.createElement('div');
+        row.className = 'shop-item';
+        row.innerHTML = '<span style="font-size:24px">' + item.emoji + '</span><div><b>' + item.name +
+          '</b><div style="font-size:11px;color:var(--muted)">' + item.price + ' 🪙</div></div>' +
+          '<button type="button" class="buy">Купить</button>';
+        onTap(row.querySelector('.buy'), function () {
+          if (state.coins < item.price) { toast('Не хватает монет'); return; }
+          state.coins -= item.price;
+          if (item.action() === false) { state.coins += item.price; return; }
+          toast('Куплено: ' + item.name); render(); openShop();
+        });
+        list.appendChild(row);
+      })(SHOP[i]);
+    }
+    var ov = $('shopOverlay'); if (ov) ov.classList.add('show');
+  }
+  onTap($('shopBtn'), openShop);
+
+  onTap($('collBtn'), function () {
+    var grid = $('collGrid'); if (!grid) return;
+    grid.innerHTML = '';
+    for (var i = 0; i < SPECIES.length; i++) {
+      var s = SPECIES[i], known = !!state.collection[s.id];
+      var card = document.createElement('div');
+      card.className = 'coll-card' + (known ? '' : ' locked');
+      card.innerHTML = '<div class="emoji">' + (known ? s.emoji : '❓') + '</div><div class="name">' +
+        (known ? s.name : '???') + '</div><span class="rarity ' + s.rarity + '">' + rarityLabel(s.rarity) + '</span>';
+      grid.appendChild(card);
+    }
+    var ov = $('collOverlay'); if (ov) ov.classList.add('show');
+  });
+
+  var GEMS = ['🍎', '🫐', '🍋', '🍇', '🌸', '⭐'];
+  var matchState = { board: [], selected: null, score: 0, moves: 12 };
+  function genBoard() {
+    var b = []; for (var i = 0; i < 36; i++) b.push(GEMS[Math.floor(Math.random() * GEMS.length)]); return b;
+  }
+  function findMatches(board) {
+    var matched = {}, r, c, i;
+    for (r = 0; r < 6; r++) for (c = 0; c < 4; c++) {
+      i = r * 6 + c;
+      if (board[i] && board[i] === board[i+1] && board[i] === board[i+2]) {
+        matched[i]=1; matched[i+1]=1; matched[i+2]=1;
+        if (c < 3 && board[i] === board[i+3]) matched[i+3]=1;
+        if (c < 2 && board[i] === board[i+4]) matched[i+4]=1;
+      }
+    }
+    for (c = 0; c < 6; c++) for (r = 0; r < 4; r++) {
+      i = r * 6 + c;
+      if (board[i] && board[i] === board[i+6] && board[i] === board[i+12]) {
+        matched[i]=1; matched[i+6]=1; matched[i+12]=1;
+        if (r < 3 && board[i] === board[i+18]) matched[i+18]=1;
+        if (r < 2 && board[i] === board[i+24]) matched[i+24]=1;
+      }
+    }
+    return matched;
+  }
+  function collapse(board) {
+    for (var c = 0; c < 6; c++) {
+      var col = [];
+      for (var r = 5; r >= 0; r--) if (board[r*6+c]) col.push(board[r*6+c]);
+      while (col.length < 6) col.push(GEMS[Math.floor(Math.random()*GEMS.length)]);
+      for (r = 5; r >= 0; r--) board[r*6+c] = col[5-r];
+    }
+  }
+  function countKeys(obj) { var n = 0; for (var k in obj) if (obj.hasOwnProperty(k)) n++; return n; }
+  function renderMatch() {
+    var ms = $('matchScore'), mm = $('matchMoves');
+    if (ms) ms.textContent = matchState.score;
+    if (mm) mm.textContent = matchState.moves;
+    var board = $('matchBoard'); if (!board) return;
+    board.innerHTML = '';
+    for (var i = 0; i < matchState.board.length; i++) {
+      (function (idx) {
+        var cell = document.createElement('div');
+        cell.className = 'match-cell' + (matchState.selected === idx ? ' selected' : '');
+        cell.textContent = matchState.board[idx] || '';
+        onTap(cell, function () {
+          if (matchState.moves <= 0) return;
+          if (matchState.selected === null) { matchState.selected = idx; renderMatch(); return; }
+          if (matchState.selected === idx) { matchState.selected = null; renderMatch(); return; }
+          var a = matchState.selected;
+          var br = Math.floor(a/6), bc = a%6, cr = Math.floor(idx/6), cc = idx%6;
+          if (Math.abs(br-cr)+Math.abs(bc-cc) !== 1) { matchState.selected = idx; renderMatch(); return; }
+          var tmp = matchState.board[a];
+          matchState.board[a] = matchState.board[idx]; matchState.board[idx] = tmp;
+          matchState.selected = null; matchState.moves--;
+          var matches = findMatches(matchState.board);
+          if (!countKeys(matches)) {
+            matchState.board[idx] = matchState.board[a]; matchState.board[a] = tmp;
+            matchState.moves++; toast('Нет комбинации');
+          } else {
+            while (countKeys(matches)) {
+              matchState.score += countKeys(matches) * 2;
+              for (var k in matches) if (matches.hasOwnProperty(k)) matchState.board[+k] = null;
+              collapse(matchState.board); matches = findMatches(matchState.board);
+            }
+          }
+          renderMatch();
+        });
+        board.appendChild(cell);
+      })(i);
+    }
+  }
+  onTap($('gameBtn'), function () {
+    matchState = { board: genBoard(), selected: null, score: 0, moves: 12 };
+    var m = findMatches(matchState.board), guard = 0;
+    while (countKeys(m) && guard < 40) {
+      for (var k in m) if (m.hasOwnProperty(k)) matchState.board[+k] = GEMS[Math.floor(Math.random()*GEMS.length)];
+      m = findMatches(matchState.board); guard++;
+    }
+    renderMatch();
+    var ov = $('matchOverlay'); if (ov) ov.classList.add('show');
+  });
+  onTap($('matchFinish'), function () {
+    var coins = Math.floor(matchState.score * 0.5);
+    state.coins += coins;
+    if (coins > 0) { toast('Выигрыш: +' + coins + ' 🪙'); addXp(Math.floor(coins/3)+1); }
+    else toast('Без монет в этот раз');
+    var ov = $('matchOverlay'); if (ov) ov.classList.remove('show');
+    render();
+  });
+
+  function updateBreedUI() {
+    for (var idx = 0; idx < 2; idx++) {
+      (function (i) {
+        var el = $('breed' + (i+1)); if (!el) return;
+        var sh = state.breedSlot[i];
+        if (sh) {
+          el.className = 'breed-slot filled';
+          el.innerHTML = sp(sh.species).emoji + '<br><b style="font-size:11px">' + sh.name + '</b>';
+        } else { el.className = 'breed-slot'; el.textContent = 'Выбрать'; }
+        onTap(el, function () { state.breedPicking = i; showBreedSelect(); });
+      })(idx);
+    }
+    var db = $('doBreed'); if (db) db.disabled = !(state.breedSlot[0] && state.breedSlot[1]);
+    showBreedSelect();
+  }
+  function showBreedSelect() {
+    var list = $('breedSelectList'); if (!list) return;
+    list.innerHTML = '<p style="font-size:12px;margin-bottom:6px">Слот ' + (state.breedPicking+1) + ':</p>';
+    var adults = [];
+    for (var i = 0; i < state.sheep.length; i++) if (state.sheep[i].age === 'adult') adults.push(state.sheep[i]);
+    if (!adults.length) { list.innerHTML += '<p style="color:var(--muted);font-size:12px">Нет взрослых</p>'; return; }
+    for (var j = 0; j < adults.length; j++) {
+      (function (sh) {
+        var s = sp(sh.species), already = false;
+        if (state.breedSlot[0] && state.breedSlot[0].id === sh.id) already = true;
+        if (state.breedSlot[1] && state.breedSlot[1].id === sh.id) already = true;
+        var row = document.createElement('div');
+        row.className = 'shop-item'; row.style.opacity = already ? '0.4' : '1';
+        row.innerHTML = '<span style="font-size:22px">' + s.emoji + '</span><div><b>' + sh.name +
+          '</b><div style="font-size:11px;color:var(--muted)">' + rarityLabel(s.rarity) + '</div></div>' +
+          '<button type="button" class="buy"' + (already?' disabled':'') + '>Выбрать</button>';
+        if (!already) onTap(row.querySelector('.buy'), function () {
+          state.breedSlot[state.breedPicking] = sh; updateBreedUI();
+        });
+        list.appendChild(row);
+      })(adults[j]);
+    }
+  }
+  onTap($('breedBtn'), function () {
+    state.breedSlot = [null, null]; state.breedPicking = 0; updateBreedUI();
+    var ov = $('breedOverlay'); if (ov) ov.classList.add('show');
+  });
+  onTap($('doBreed'), function () {
+    if (state.coins < 30) { toast('Нужно 30 🪙'); return; }
+    if (state.sheep.length >= 5) { toast('Загон полный'); return; }
+    var a = state.breedSlot[0], b = state.breedSlot[1]; if (!a || !b) return;
+    state.coins -= 30;
+    var sid = randomSpecies(a.species !== b.species);
+    var baby = { id: state.nextId++, name: randomName(), species: sid, age: 'baby', woolReady: false };
+    state.sheep.push(baby); state.collection[sid] = true;
+    toast('🧬 Родился ' + baby.name + ' (' + rarityLabel(sp(sid).rarity) + ')!');
+    addXp(8);
+    var ov = $('breedOverlay'); if (ov) ov.classList.remove('show');
+    render();
+  });
+
+  var closes = document.querySelectorAll('[data-close]');
+  for (var ci = 0; ci < closes.length; ci++) {
+    (function (btn) {
+      onTap(btn, function () {
+        var ov = $(btn.getAttribute('data-close'));
+        if (ov) ov.classList.remove('show');
+      });
+    })(closes[ci]);
+  }
+  var overlays = document.querySelectorAll('.overlay');
+  for (var oi = 0; oi < overlays.length; oi++) {
+    (function (ov) {
+      ov.addEventListener('click', function (e) { if (e.target === ov) ov.classList.remove('show'); }, false);
+    })(overlays[oi]);
+  }
+
+  setInterval(function () {
+    state.hour = (state.hour + 1) % 24;
+    if (Math.random() < 0.22) {
+      state.weather = ['clear','cloudy','rain','storm'][Math.floor(Math.random()*4)];
+      if (state.weather === 'rain' || state.weather === 'storm') {
+        state.water = Math.min(20, state.water + (state.weather === 'storm' ? 3 : 1));
+        render();
+      }
+    }
+    for (var i = 0; i < state.sheep.length; i++) {
+      if (state.sheep[i].age === 'baby' && Math.random() < 0.08) {
+        state.sheep[i].age = 'adult'; toast(state.sheep[i].name + ' выросла! 🎉'); render();
+      }
+    }
+    if ((state.hour >= 21 || state.hour < 5) && !state.dog && !state.wolfActive && state.sheep.length > 1 && Math.random() < 0.15) {
+      state.wolfActive = true;
+      toast('🐺 Волк у загона! Купите собаку-пастуха в магазине!');
+      setTimeout(function () {
+        if (state.wolfActive && !state.dog && state.sheep.length > 1) {
+          var idx = Math.floor(Math.random() * state.sheep.length);
+          var lost = state.sheep[idx];
+          state.sheep.splice(idx, 1);
+          toast('🐺 Волк унёс ' + lost.name + '...');
+          render();
+        }
+        state.wolfActive = false;
+      }, 4000);
+    }
+    updateTimeUI();
+    var go = $('gardenOverlay');
+    if (go && go.classList.contains('show')) openGarden();
+  }, 12000);
+
+  render();
+})();
+</script>
+</body>
+</html>
